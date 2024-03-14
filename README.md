@@ -12,8 +12,6 @@ Before running the Ansible playbook, ensure you have the following:
 
 1. **Ansible Control Node**: An Ubuntu 18.04 machine with Ansible installed and configured to connect to your Ansible hosts using SSH keys. Make sure the control node has a regular user with sudo permissions and a firewall enabled. If you haven't set up Ansible yet, follow our guide on [How to Install and Configure Ansible on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-use-ansible-to-install-and-set-up-lamp-on-ubuntu-18-04).
 
-2. **Ansible Hosts**: One or more remote Ubuntu 18.04 servers previously set up following the guide on [How to Use Ansible to Automate Initial Server Setup on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-use-ansible-to-install-and-set-up-lamp-on-ubuntu-18-04). Ensure your Ansible control node can connect and execute commands on these hosts.
-
 ## What Does this Playbook Do?
 
 Running this Ansible playbook will perform the following actions on your Ansible hosts:

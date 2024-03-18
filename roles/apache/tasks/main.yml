@@ -1,0 +1,105 @@
+- name: Install Apache
+  apt:
+    name: apache2
+    state: present
+
+- name: Enable and start Apache service
+  service:
+    name: apache2
+    enabled: yes
+    state: started
+
+- name: Create {{ apache_user }} user with home directory
+  user:
+    name: "{{ apache_user  }}"
+    password: "{{ apache_user_password | password_hash('sha512') }}"
+    home: "{{ apache_home_dir  }}"
+    shell: /bin/bash
+
+- name: Create {{ apache_user }} home directory
+  file:
+    path: "{{ apache_home_dir }}"
+    state: directory
+    owner: "{{ apache_user }}"
+    group: "{{ apache_user }}"
+    mode: 0755
+
+- name: Set ownership of {{ apache_user }} home directory
+  file:
+    path: "{{ apache_home_dir }}"
+    owner: "{{ apache_user }}"
+    group: "{{ apache_user }}"
+    recurse: yes
+
+- name: Change apache user and group to {{ apache_user }}
+  lineinfile:
+    path: /etc/apache2/envvars
+    regexp: "^export APACHE_RUN_USER=(.*)$"
+    line: "export APACHE_RUN_USER={{ apache_user }}"
+    state: present
+  notify:
+    - restart apache2
+
+- name: Change apache group to {{ apache_user }}
+  lineinfile:
+    path: /etc/apache2/envvars
+    regexp: "^export APACHE_RUN_GROUP=(.*)$"
+    line: "export APACHE_RUN_GROUP={{ apache_user }}"
+    state: present
+  notify:
+    - restart apache2
+
+
+
+- name: Create document root directory for virtual host
+  file:
+    path: "{{ apache_home_dir }}/public_html"
+    state: directory
+    owner: "{{ apache_user  }}"
+    group: "{{ apache_user  }}"
+    mode: '0755'
+    recurse: yes
+
+- name: Create virtual host file for {{ apache_domain }}
+  copy:
+    dest: "/etc/apache2/sites-available/{{ apache_domain }}.conf"
+    content: |
+      <VirtualHost *:80>
+      ServerAdmin webmaster@{{ apache_domain }}
+      ServerName {{ apache_domain }}
+      DocumentRoot {{ apache_home_dir }}/public_html
+
+      <Directory {{ apache_home_dir }}/public_html>
+      Options -Indexes +FollowSymLinks
+      AllowOverride All
+      Require all granted
+      </Directory>
+
+      ErrorLog ${APACHE_LOG_DIR}/error.log
+      CustomLog ${APACHE_LOG_DIR}/access.log combined
+      </VirtualHost>
+  notify:
+    - restart apache2
+
+- name: Enable mod_rewrite for {{ apache_domain }} virtual host
+  apache2_module:
+    name: rewrite
+    state: present
+  notify:
+    - restart apache2
+
+- name: Enable {{ apache_domain }} virtual host
+  command: a2ensite {{ apache_domain }}.conf
+  notify:
+    - restart apache2
+
+- name: Copy index.html file to Apache virtual host home directory
+  copy:
+    src: templates/index.html
+    dest: "{{ apache_home_dir }}/public_html/index.html"
+    mode: '0644'
+    owner: "{{ apache_user  }}"
+    group: "{{ apache_user  }}"
+  notify:
+    - restart apache2
+

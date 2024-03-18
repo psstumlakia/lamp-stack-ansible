@@ -1,0 +1,13 @@
+---
+# handlers file for apache role
+
+- name: restart Apache
+  service:
+    name: httpd
+    state: restarted
+
+
+- name: Reload Apache
+  service:
+    name: apache2
+    state: reloaded

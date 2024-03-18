@@ -1,0 +1,13 @@
+---
+# handlers file for my_role
+
+- name: restart apache
+  service:
+    name: apache2
+    state: restarted
+
+- name: restart vsftpd
+  service:
+    name: vsftpd
+    state: restarted
+

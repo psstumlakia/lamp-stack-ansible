@@ -1,0 +1,65 @@
+---
+- name: Install MySQL Server
+  apt:
+    name:
+    - mysql-server
+    - python3-pymysql
+    - python3-mysqldb
+    state: present
+
+- name: Start and enable MySQL service
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: Set up Unix socket authentication for MySQL root user
+  mysql_user:
+    name: root
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    user: root
+    host: localhost
+    password: ''
+    priv: '*.*:ALL,GRANT'
+    state: present
+  notify:
+    - restart MySQL
+
+- name: Create new MySQL user
+  no_log: "{{ mysql_new_password }}"
+  mysql_user:
+    login_user: root
+    name: "{{ mysql_new_user }}"
+    password: "{{ mysql_new_password }}"
+    host: "%"
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    update_password: always
+
+- name: Grant all privileges to new {{ mysql_new_user }}
+  no_log: "{{ mysql_new_password }}"
+  mysql_user:
+    login_user: root
+    name: "{{ mysql_new_user }}"
+    password: "{{ mysql_new_password }}"
+    host: "%"
+    priv: "*.*:ALL,GRANT"
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    update_password: always
+
+- name: Removes all anonymous user accounts
+  mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+    login_user: root
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Removes the MySQL test database
+  mysql_db:
+    name: test
+    state: absent
+    login_user: root
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+

@@ -3,11 +3,16 @@
   hosts: worker
   become: true
 
+#vars files added To store Secrets. Issue #3
+  vars_files:
+    - vault/vault.yml
+
   vars:
     apache_domain: example.com
     apache_home_dir: /var/www/{{ apache_domain }}
     apache_user: example
-    apache_user_password: "Pass_123@#"
+# Removed from vars and added to vars_files. Issue #3
+#    apache_user_password: "Pass_123@#"
     mysql_new_user: "{{ apache_user }}"
     mysql_new_password: "{{ apache_user_password }}"
     apache_user_home_dir: /home/apache

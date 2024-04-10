@@ -28,7 +28,14 @@ Running this Ansible playbook will perform the following actions on your Ansible
 
 1. Clone this repository to your Ansible control node.
 2. Edit the `hosts` file to specify the target hosts.
-3. Run the playbook using the following command:
+3. Create the Ansible Secret file in vault/vault.yml file and add the password. Example password is already in place
+   Then run:
+   ```bash
+   ansible-vault create vars/vault.yml
+   ```
+
+4. Run the playbook using the following command:
 
    ```bash
    ansible-playbook -i hosts site.yml
+   ```
